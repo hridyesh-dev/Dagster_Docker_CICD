@@ -9,6 +9,9 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Fix file permissions
+        run: sudo chown -R ubuntu:ubuntu /home/ubuntu/actions-runner/_work/Dagster_Docker_CICD
+      
       - name: Checkout code
         uses: actions/checkout@v3
 
