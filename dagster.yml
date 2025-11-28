@@ -1,2 +1,4 @@
-telemetry:
-  enabled: false
+# dagster.yaml
+storage:
+  filesystem:
+    base_dir: /opt/dagster/app/data
