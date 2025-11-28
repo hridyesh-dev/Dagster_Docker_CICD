@@ -12,9 +12,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Show current directory and files
+        run: |
+          pwd
+          ls -la
+
+      - name: Show docker-compose file
+        run: cat docker-compose.yaml || echo "No docker-compose.yaml found"
+
       - name: Build and run Dagster with Docker Compose
         run: |
-          docker-compose down
+          docker-compose down || true
           docker-compose up -d --build
 
       - name: Show running containers
