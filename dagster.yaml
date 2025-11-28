@@ -17,10 +17,11 @@ scheduler:
   module: dagster.core.scheduler
   class: DagsterDaemonScheduler
 
-enable_automatic_run_reexecution: false
 run_monitoring:
   enabled: false
-sensors:
-  enabled: false
+
 schedules:
-  enabled: false
+  num_workers: 0
+
+sensors:
+  num_workers: 0
