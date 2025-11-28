@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  dagster:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dagster-etl
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/opt/dagster/app/data
+      - ./dagster.yaml:/opt/dagster/home/dagster.yaml
+    environment:
+      - DAGSTER_HOME=/opt/dagster/home

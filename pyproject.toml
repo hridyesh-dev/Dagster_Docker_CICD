@@ -1,0 +1,24 @@
+
+[project]
+name = "etl"
+version = "0.1.0"
+description = "ETL pipeline with Dagster"
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "dagster",
+    "dagster-webserver",
+    "pandas"
+]
+
+[tool.dagster]
+module_name = "etl.definitions"
+code_location_name = "etl"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+# Use src layout to avoid accidental package discovery
+[tool.setuptools.packages.find]
+where = ["src"]
