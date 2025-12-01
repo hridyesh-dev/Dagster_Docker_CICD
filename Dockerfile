@@ -1,29 +1,31 @@
 
+# Dockerfile
 FROM python:3.12-slim
 
+# System deps for native wheels
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Dagster home and working directory
 ENV DAGSTER_HOME=/opt/dagster/home
 WORKDIR /opt/dagster/app
 
-# System build deps for pandas wheels (and general compilation)
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential \
-    && rm -rf /var/lib/apt/lists/*
+# Install dependencies (option A: requirements.txt)
+COPY requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project metadata and source BEFORE installing
-COPY pyproject.toml ./
-COPY src/ ./src
-COPY data/ ./data
+# Copy project files
+COPY . .
 
-# Install package + deps from pyproject
-RUN python -m pip install --upgrade pip wheel \
-    && pip install --no-cache-dir . \
-    && pip cache purge
+# OPTIONAL (Option B): install as editable package using pyproject
+# This makes `etl` importable without needing PYTHONPATH
+RUN pip install --no-cache-dir -e .
 
-# Create Dagster home and non-root user
-RUN mkdir -p "${DAGSTER_HOME}" \
-    && useradd -m -u 10001 dagster \
-    && chown -R dagster:dagster /opt/dagster
-USER dagster
+# Create Dagster home
+RUN mkdir -p ${DAGSTER_HOME}
 
 EXPOSE 3000
+
+# Default command (compose overrides with workspace flag)
 CMD ["dagster", "dev", "-h", "0.0.0.0", "-p", "3000"]

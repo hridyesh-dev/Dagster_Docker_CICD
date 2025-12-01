@@ -1,3 +1,5 @@
+
+# .github/workflows/deploy.yml
 name: Deploy Dagster on EC2
 
 on:
@@ -9,24 +11,46 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Fix file permissions
-        run: sudo chown -R ubuntu:ubuntu /home/ubuntu/actions-runner/_work/Dagster_Docker_CICD
-      
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Show current directory and files
+      - name: Ensure docker & compose available
+        run: |
+          docker --version
+          if command -v docker compose >/dev/null 2>&1; then
+            docker compose version
+          else
+            docker-compose version || (sudo apt-get update && sudo apt-get install -y docker-compose)
+          fi
+
+      - name: Fix permissions on workspace (only if runner is not root)
+        run: |
+          sudo chown -R $USER:$USER "$GITHUB_WORKSPACE" || true
+
+      - name: Show structure
         run: |
           pwd
           ls -la
+          tree -L 3 || true
 
       - name: Show docker-compose file
         run: cat docker-compose.yaml || echo "No docker-compose.yaml found"
 
-      - name: Build and run Dagster with Docker Compose
+      - name: Build & run Dagster
+        working-directory: ${{ github.workspace }}
         run: |
-          docker-compose down || true
-          docker-compose up -d --build
+          if command -v docker compose >/dev/null 2>&1; then
+            docker compose down || true
+            docker compose up -d --build
+            docker compose ps
+          else
+            docker-compose down || true
+            docker-compose up -d --build
+            docker-compose ps
+          fi
 
-      - name: Show running containers
-        run: docker ps
+      - name: Tail dagster logs (brief)
+        run: docker logs --tail 200 dagster-etl || true
+
+      - name: List containers
+        run: docker ps -a

@@ -4,21 +4,36 @@ name = "etl"
 version = "0.1.0"
 description = "ETL pipeline with Dagster"
 requires-python = ">=3.10,<3.14"
+
+# Pin versions if you want reproducibility (optional but recommended)
 dependencies = [
     "dagster",
     "dagster-webserver",
     "pandas"
 ]
 
+# Optional: include non-code files if you later package assets/configs
+# dynamic = ["readme"]
+# readme = "README.md"
+
+# If you need console scripts later:
+# [project.scripts]
+# etl-cli = "etl.cli:main"
+
 [tool.dagster]
+# This tells Dagster where your Definitions live
 module_name = "etl.definitions"
+# Name for the code location in Dagit
 code_location_name = "etl"
 
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
-
 
 # Use src layout to avoid accidental package discovery
 [tool.setuptools.packages.find]
 where = ["src"]
+
+# If you need to include package data (e.g., templates):
+# [tool.setuptools.package-data]
+# etl = ["resources/*"]

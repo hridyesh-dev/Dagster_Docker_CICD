@@ -1,3 +1,5 @@
+
+version: "3.8"
 services:
   dagster:
     build:
@@ -6,9 +8,24 @@ services:
     container_name: dagster-etl
     ports:
       - "3000:3000"
-    volumes:
-      - ./data:/opt/dagster/app/data
-      - ./dagster.yaml:/opt/dagster/home/dagster.yaml
     environment:
       - DAGSTER_HOME=/opt/dagster/home
-    command: ["dagster", "dev", "-h", "0.0.0.0", "-p", "3000"]
+    volumes:
+      # Mount whole repo (so workspace.yaml is visible)
+      - ./:/opt/dagster/app
+      # Ensure Dagster instance config is available
+      - ./dagster.yaml:/opt/dagster/home/dagster.yaml
+      # Mount data dir for assets IO
+      - ./data:/opt/dagster/app/data
+      # Persist Dagster home onto a Docker volume
+      - dagster_home:/opt/dagster/home
+    command: ["dagster", "dev", "-w", "/opt/dagster/app/workspace.yaml", "-h", "0.0.0.0", "-p", "3000"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sSf http://localhost:3000 || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  dagster_home:
